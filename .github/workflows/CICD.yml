@@ -1,0 +1,34 @@
+name: CICD # このworkflowの名前
+
+on: # onで実行タイミングを設定
+  workflow_dispatch: # 手動で実行するAction
+  push:
+    branches:
+      - mian # mainブランチにpushされた時に実行
+
+jobs:
+  cicd:
+    runs-on: ubuntu-latest
+    steps:
+      # build
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the project
+        run: npm run build
+
+      # test
+      - name: Test with jest
+        run: npm run test
+
+      # deploy
+      - name: Setup Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Deploy to Firebase
+        run: firebase deploy --token $FIREBASE_AUTH_TOKEN
+        env:
+          FIREBASE_AUTH_TOKEN: ${{ secrets.FIREBASE_AUTH_TOKEN }}
