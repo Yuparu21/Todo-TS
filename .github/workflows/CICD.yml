@@ -4,7 +4,7 @@ on: # onで実行タイミングを設定
   workflow_dispatch: # 手動で実行するAction
   push:
     branches:
-      - mian # mainブランチにpushされた時に実行
+      - main # mainブランチにpushされた時に実行
 
 jobs:
   cicd:
