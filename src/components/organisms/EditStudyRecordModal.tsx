@@ -2,29 +2,36 @@ import { Box, Center, Input, Spinner, Stack, Text } from "@chakra-ui/react";
 import { FC, memo } from "react";
 import { DialogBody, DialogCloseTrigger, DialogContent, DialogHeader, DialogRoot, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { useAddStudyRecord } from "../../hooks/useAddStudyRecord";
 import { useGlobalLoading } from "../../hooks/useGlobalLoading";
 import { PrimaryButton } from "../atoms/PrimaryButton";
+import { useEditStudyRecord } from "../../hooks/useEditStudyRecord";
+import { StudyRecord } from "../../models/studyRecord";
 
 
 type Props = {
     getStudyRecords: () => Promise<void>;
+    record: StudyRecord;
 };
 
-export const AddStudyRecordModal: FC<Props> = memo(({ getStudyRecords }) => {
+export const EditStudyRecordModal: FC<Props> = memo(({ getStudyRecords, record }) => {
 
     const { isLoading, setIsLoading } = useGlobalLoading();
-    const { addStudyRecord } = useAddStudyRecord(setIsLoading);
+    const { updateStudyRecord } = useEditStudyRecord(setIsLoading);
+
 
     type FormValues = {
+        recordId: string;
         studyContents: string;
         studyHour: string;
     };
 
-    const { register, handleSubmit, formState: { errors }, reset } = useForm<FormValues>();
+    const { register, handleSubmit, reset, watch, formState: { errors } } =
+        useForm<FormValues>({ defaultValues: { studyContents: record?.title, studyHour: String(record?.time) } });
+    const studyContents = watch("studyContents");
+    const studyHour = watch("studyHour");
 
-    const onClickRegisteration: SubmitHandler<FormValues> = async (data) => {
-        await addStudyRecord(data.studyContents, data.studyHour);
+    const onClickUpdate: SubmitHandler<FormValues> = async () => {
+        await updateStudyRecord(record.id, studyContents, studyHour);
         reset();
         await getStudyRecords();
     };
@@ -35,15 +42,15 @@ export const AddStudyRecordModal: FC<Props> = memo(({ getStudyRecords }) => {
         <DialogRoot>
             <DialogTrigger asChild>
                 <Box>
-                    <PrimaryButton bg="teal.500">新規登録</PrimaryButton>
+                    <PrimaryButton bg="teal.500" >編集</PrimaryButton>
                 </Box>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle fontSize="2xl">学習内容</DialogTitle>
+                    <DialogTitle fontSize="2xl">記録編集</DialogTitle>
                 </DialogHeader>
                 <DialogBody>
-                    <form onSubmit={handleSubmit(onClickRegisteration)}>
+                    <form onSubmit={handleSubmit(onClickUpdate)}>
                         <Stack>
                             <label htmlFor="studyContents">内容</label>
                             <Input
@@ -72,7 +79,7 @@ export const AddStudyRecordModal: FC<Props> = memo(({ getStudyRecords }) => {
                             )}
                             <Box mt={3} display='flex' justifyContent='center'>
                                 <PrimaryButton bg="teal.500" type="submit">
-                                    登録
+                                    更新
                                 </PrimaryButton>
                             </Box>
                         </Stack>

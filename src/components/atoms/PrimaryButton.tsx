@@ -3,14 +3,15 @@ import { Button } from "@chakra-ui/react";
 
 type Props = {
     children: ReactNode;
+    bg?: string;
     onClick?: () => void;
     type?: "button" | "reset" | "submit" | undefined;
 };
 export const PrimaryButton: FC<Props> = memo((props) => {
-    const { children, onClick, type } = props;
+    const { children, bg, onClick, type } = props;
     return (
         <Button
-            bg="teal.500"
+            bg={bg}
             color="white"
             _hover={{ opacity: 0.8 }}
             onClick={onClick}

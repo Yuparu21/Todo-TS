@@ -8,7 +8,9 @@ import { useAddStudyRecord } from "../src/hooks/useAddStudyRecord";
 import { ChakraProvider } from "@chakra-ui/react";
 import { StudyRecordManagement } from "../src/components/pages/StudyRecordManagement";
 import { system } from "../src/theme/theme";
+import { useEditStudyRecord } from "../src/hooks/useEditStudyRecord";
 import { useDeleteStudyRecord } from "../src/hooks/useDeleteStudyRecord";
+import { EditStudyRecordModal } from "../src/components/organisms/EditStudyRecordModal";
 
 // モックを用意する
 jest.mock("../src/hooks/useGlobalLoading", () => ({
@@ -19,6 +21,9 @@ jest.mock("../src/hooks/useAllStudyRecords", () => ({
 }));
 jest.mock("../src/hooks/useAddStudyRecord", () => ({
     useAddStudyRecord: jest.fn(),
+}));
+jest.mock("../src/hooks/useEditStudyRecord", () => ({
+    useEditStudyRecord: jest.fn(),
 }));
 jest.mock("../src/hooks/useDeleteStudyRecord", () => ({
     useDeleteStudyRecord: jest.fn(),
@@ -38,6 +43,9 @@ describe("Componentテスト", () => {
 
         (useAddStudyRecord as jest.Mock).mockReturnValue({
             addStudyRecord: jest.fn(),
+        });
+        (useEditStudyRecord as jest.Mock).mockReturnValue({
+            updateStudyRecord: jest.fn(),
         });
         (useDeleteStudyRecord as jest.Mock).mockReturnValue({
             eraseStudyRecord: jest.fn(),
@@ -93,11 +101,13 @@ describe("Componentテスト", () => {
 describe("機能テスト", () => {
     let getStudyRecordsMock: jest.Mock;
     let addStudyRecordMock: jest.Mock;
+    let updateStudyRecordMock: jest.Mock;
     let eraseStudyRecordMock: jest.Mock;
     // モックの準備
     beforeEach(() => {
         getStudyRecordsMock = jest.fn();
         addStudyRecordMock = jest.fn();
+        updateStudyRecordMock = jest.fn();
         eraseStudyRecordMock = jest.fn();
 
         (useGlobalLoading as jest.Mock).mockReturnValue({
@@ -110,6 +120,9 @@ describe("機能テスト", () => {
         });
         (useAddStudyRecord as jest.Mock).mockReturnValue({
             addStudyRecord: addStudyRecordMock,
+        });
+        (useEditStudyRecord as jest.Mock).mockReturnValue({
+            updateStudyRecord: updateStudyRecordMock,
         });
         (useDeleteStudyRecord as jest.Mock).mockReturnValue({
             eraseStudyRecord: eraseStudyRecordMock,
@@ -132,6 +145,29 @@ describe("機能テスト", () => {
         // addStudyRecord が正しく呼ばれることを確認
         await waitFor(() => {
             expect(addStudyRecordMock).toHaveBeenCalledWith("Reactの勉強", "2");
+        });
+        // 一覧が更新されることを確認
+        await waitFor(() => {
+            expect(getStudyRecordsMock).toHaveBeenCalled();
+        });
+    });
+    it("学習記録を更新できること", async () => {
+        render(
+            <ChakraProvider value={system}>
+                <EditStudyRecordModal getStudyRecords={getStudyRecordsMock} record={{ id: "1", title: "test", time: 3 }} />
+            </ChakraProvider>
+        );
+        // 学習内容と学習時間を入力
+        fireEvent.click(screen.getByText("編集"));
+        await waitFor(() => {
+            fireEvent.change(screen.getByLabelText("内容"), { target: { value: "Reactの勉強" } });
+            fireEvent.change(screen.getByLabelText("時間（h）"), { target: { value: "2" } });
+        });
+        // 登録ボタンをクリック
+        fireEvent.click(screen.getByText("更新"));
+        // addStudyRecord が正しく呼ばれることを確認
+        await waitFor(() => {
+            expect(updateStudyRecordMock).toHaveBeenCalledWith("1", "Reactの勉強", "2");
         });
         // 一覧が更新されることを確認
         await waitFor(() => {

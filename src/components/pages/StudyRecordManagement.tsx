@@ -1,10 +1,11 @@
 import { useEffect, memo } from "react";
-import { PrimaryButton } from "../../components/atoms/PrimaryButton";
 import { Box, Center, Heading, Spinner, Table, VStack } from "@chakra-ui/react";
 import { useAllStudyRecords } from "../../hooks/useAllStudyRecords";
 import { useDeleteStudyRecord } from "../../hooks/useDeleteStudyRecord";
 import { useGlobalLoading } from "../../hooks/useGlobalLoading";
 import { AddStudyRecordModal } from "../organisms/AddStudyRecordModal";
+import { PrimaryButton } from "../atoms/PrimaryButton";
+import { EditStudyRecordModal } from "../organisms/EditStudyRecordModal";
 
 export const StudyRecordManagement = memo(() => {
 
@@ -23,7 +24,6 @@ export const StudyRecordManagement = memo(() => {
 
     if (isLoading) return <Center h="100vh" ><Spinner data-testid="spinner" /></Center>
 
-
     return (
         <>
             <Heading as="h1" size="5xl" textAlign="center" margin={5} >
@@ -37,8 +37,8 @@ export const StudyRecordManagement = memo(() => {
                             <Table.Row>
                                 <Table.ColumnHeader textAlign="center" fontWeight="bold">学習内容</Table.ColumnHeader>
                                 <Table.ColumnHeader textAlign="center" fontWeight="bold">学習時間</Table.ColumnHeader>
-                                <Table.ColumnHeader textAlign="center" fontWeight="bold">編集</Table.ColumnHeader>
-                                <Table.ColumnHeader textAlign="center" fontWeight="bold">削除</Table.ColumnHeader>
+                                <Table.ColumnHeader textAlign="center" fontWeight="bold"></Table.ColumnHeader>
+                                <Table.ColumnHeader textAlign="center" fontWeight="bold"></Table.ColumnHeader>
                             </Table.Row>
                         </Table.Header>
                         <Table.Body>
@@ -46,9 +46,11 @@ export const StudyRecordManagement = memo(() => {
                                 <Table.Row key={record.id}>
                                     <Table.Cell textAlign="center" w="40%">{record.title}</Table.Cell>
                                     <Table.Cell textAlign="center" w="40%">{record.time}h</Table.Cell>
-                                    <Table.Cell textAlign="center" w="10%">編集</Table.Cell>
                                     <Table.Cell textAlign="center" w="10%">
-                                        <PrimaryButton onClick={() => onClickDelete(record.id)}>削除</PrimaryButton>
+                                        <EditStudyRecordModal getStudyRecords={getStudyRecords} record={record} />
+                                    </Table.Cell>
+                                    <Table.Cell textAlign="center" w="10%">
+                                        <PrimaryButton bg="grey" onClick={() => onClickDelete(record.id)}>削除</PrimaryButton>
                                     </Table.Cell>
                                 </Table.Row>
                             ))}
